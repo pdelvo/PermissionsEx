@@ -18,7 +18,6 @@
  */
 package ru.tehkode.permissions.bukkit;
 
-import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -71,12 +70,16 @@ public class PermissionsEx extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		if (this.permissionsManager == null) {
+			this.permissionsManager = new PermissionManager(this.config);
+		}
+		
 		// Register commands
-		this.commandsManager.register(new UtilityCommands());
 		this.commandsManager.register(new UserCommands());
 		this.commandsManager.register(new GroupCommands());
 		this.commandsManager.register(new PromotionCommands());
 		this.commandsManager.register(new WorldCommands());
+		this.commandsManager.register(new UtilityCommands());
 
 		// Register Player permissions cleaner
 		PlayerEventsListener cleaner = new PlayerEventsListener();
@@ -167,7 +170,7 @@ public class PermissionsEx extends JavaPlugin {
 	public boolean has(Player player, String permission, String world) {
 		return this.permissionsManager.has(player, permission, world);
 	}
-
+	
 	public class PlayerEventsListener implements Listener {
 
 		protected boolean logLastPlayerLogin = false;

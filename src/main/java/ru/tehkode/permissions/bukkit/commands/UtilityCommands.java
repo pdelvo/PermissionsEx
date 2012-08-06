@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -33,6 +34,7 @@ import ru.tehkode.permissions.PermissionBackend;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 import ru.tehkode.permissions.commands.Command;
+import ru.tehkode.permissions.commands.CommandsManager.CommandBinding;
 
 public class UtilityCommands extends PermissionsCommand {
 
@@ -67,7 +69,7 @@ public class UtilityCommands extends PermissionsCommand {
 			try {
 				config.save(new File(plugin.getDataFolder(), "config.yml"));
 			} catch (Throwable e) {
-				sender.sendMessage(ChatColor.RED + "[PermissionsEx] Failed to save configuration: " + e.getMessage());								
+				sender.sendMessage(ChatColor.RED + "[PermissionsEx] Failed to save configuration: " + e.getMessage());
 			}
 		}
 
@@ -176,5 +178,40 @@ public class UtilityCommands extends PermissionsCommand {
 		}
 
 		logger.warning(debugStatusMessage);
+	}
+
+	@Command(name = "pex",
+	syntax = "help [page] [count]",
+	permission = "permissions.manage",
+	description = "PermissionsEx commands help")
+	public void showHelp(Plugin plugin, CommandSender sender, Map<String, String> args) {
+		List<CommandBinding> commands = this.manager.getCommands();
+
+		int count = args.containsKey("count") ? Integer.parseInt(args.get("count")) : 4;
+		int page = args.containsKey("page") ? Integer.parseInt(args.get("page")) : 1;
+
+		if (page < 1) {
+			sender.sendMessage("Page couldn't be lower than 1");
+			return;
+		}
+
+		int totalPages = (int) Math.ceil(commands.size() / count);
+
+		sender.sendMessage(ChatColor.BLUE + "PermissionsEx" + ChatColor.WHITE + " commands (page " + ChatColor.GOLD + page + "/" + totalPages + ChatColor.WHITE + "): ");
+
+		int base = count * (page - 1);
+
+		for (int i = base; i < base + count; i++) {
+			if (i >= commands.size()) {
+				break;
+			}
+
+			Command command = commands.get(i).getMethodAnnotation();
+			String commandName = String.format("/%s %s", command.name(), command.syntax()).replace("<", ChatColor.BOLD.toString() + ChatColor.RED + "<").replace(">", ">" + ChatColor.RESET + ChatColor.GOLD.toString()).replace("[", ChatColor.BOLD.toString() + ChatColor.BLUE + "[").replace("]", "]" + ChatColor.RESET + ChatColor.GOLD.toString());
+
+
+			sender.sendMessage(ChatColor.GOLD + commandName);
+			sender.sendMessage(ChatColor.AQUA + "    " + command.description());
+		}
 	}
 }

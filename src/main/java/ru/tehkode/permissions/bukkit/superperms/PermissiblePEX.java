@@ -50,7 +50,7 @@ public class PermissiblePEX extends PermissibleBase {
 	};
 	protected Player player = null;
 	protected boolean strictMode = false;
-	protected boolean injectMetadata = true;
+	protected boolean injectMetadata = false;
 	protected BukkitPermissions bridge;
 	protected Map<String, PermissionCheckResult> cache = new HashMap<String, PermissionCheckResult>();
 
@@ -62,7 +62,7 @@ public class PermissiblePEX extends PermissibleBase {
 		this.strictMode = bridge.isStrictMode();
 		this.player = player;
 	}
-
+	
 	public static void inject(Player player, BukkitPermissions bridge) {
 		if (player.isPermissionSet("permissionsex.handler.injected")) { // already injected
 			return;
@@ -93,7 +93,7 @@ public class PermissiblePEX extends PermissibleBase {
 			Logger.getLogger("Minecraft").warning("[PermissionsEx] Failed to inject own Permissible");
 			e.printStackTrace();
 		}
-	}
+	}	
 
 	public static void reinjectAll() {
 		Logger.getLogger("Minecraft").warning("[PermissionsEx] Reinjecting all permissibles");
@@ -193,9 +193,13 @@ public class PermissiblePEX extends PermissibleBase {
 	@Override
 	public void recalculatePermissions() {
 		super.recalculatePermissions();
-
+		
 		if (this.cache != null) {
 			this.cache.clear();
+		}
+				
+		if (bridge != null) {
+			bridge.checkAllParentPermissions(false);
 		}
 	}
 
@@ -282,4 +286,5 @@ public class PermissiblePEX extends PermissibleBase {
 
 		return plugin != null && plugin instanceof PermissionsEx;
 	}
+	
 }
